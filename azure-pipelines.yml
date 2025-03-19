@@ -1,7 +1,6 @@
 # Gradle
 # Build your Java project and run tests with Gradle using a Gradle wrapper script.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/java
+# Enhanced debugging for exit code 1 troubleshooting.
 
 trigger:
 - main
@@ -10,13 +9,22 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+- script: java -version
+  displayName: 'Check Java Version'
+
+- script: chmod +x gradlew
+  displayName: 'Ensure Gradle Wrapper is Executable'
+
+- script: ./gradlew dependencies --stacktrace
+  displayName: 'Check Gradle Dependencies'
+
 - task: Gradle@3
   inputs:
-    gradleWrapperFile: 'gradlew'  # Path to your Gradle wrapper
-    tasks: 'build'  # Replace with the tasks you want to run
-    options: '-Xmx3072m' 
+    gradleWrapperFile: 'gradlew'
+    tasks: 'build'
+    options: '--stacktrace --info --debug -Xmx3072m'  # Added debug flags
     publishJUnitResults: true
-    testResultsFiles: '**/TEST-*.xml'  # Updated pattern for test result files
+    testResultsFiles: '**/TEST-*.xml'
     javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'  # Replace with your JDK version
+    jdkVersionOption: '1.11'
     jdkArchitectureOption: 'x64'
